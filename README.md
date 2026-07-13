@@ -15,8 +15,7 @@ An interactive detective-style evidence board showcasing the case files of Marc 
 | 005 | Nightfall: The Observatory Problem | https://nightfall-observatory-problem.netlify.app/ |
 | 006 | The AI Midway | https://prototype-midway-fable-5.netlify.app/ |
 | 007 | Omelas: The Classroom Walk | https://omelas-classroom-walk.netlify.app/ |
-| 008 | As I Lay Dying: The Card Game | https://mwatkins03-netizen.github.io/As-I-Lay-Dying-Card-Game-Fable-5-/ |
-| 009 | Affordable Housing Simulator | https://mwatkins03-netizen.github.io/Affordable-Housing-Simulator-Fable-5-/ |
+| 008 | Affordable Housing Simulator | https://mwatkins03-netizen.github.io/Affordable-Housing-Simulator-Fable-5-/ |
 
 ## What is Frictionware?
 
