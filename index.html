@@ -467,47 +467,49 @@ function assetTex(path){
   t.colorSpace=THREE.SRGBColorSpace; t.anisotropy=8;
   return t;
 }
-// sticky-note assets carry a blurred halo background; feather the edges to alpha
-// so the halo melts into the cork instead of reading as a pale rectangle
-function maskedTex(path){
-  const c=document.createElement('canvas'); c.width=561; c.height=701;
-  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; t.anisotropy=8;
-  const img=new Image();
-  img.onload=()=>{
-    const ctx=c.getContext('2d');
-    ctx.drawImage(img,0,0,c.width,c.height);
-    ctx.globalCompositeOperation='destination-in';
-    const f=0.16; // feather fraction
-    const gx=ctx.createLinearGradient(0,0,c.width,0);
-    gx.addColorStop(0,'rgba(0,0,0,0)'); gx.addColorStop(f,'#000');
-    gx.addColorStop(1-f,'#000'); gx.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=gx; ctx.fillRect(0,0,c.width,c.height);
-    const gy=ctx.createLinearGradient(0,0,0,c.height);
-    gy.addColorStop(0,'rgba(0,0,0,0)'); gy.addColorStop(f,'#000');
-    gy.addColorStop(1-f,'#000'); gy.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=gy; ctx.fillRect(0,0,c.width,c.height);
-    t.needsUpdate=true;
-  };
-  img.src=path;
-  return t;
-}
-// white-background assets: key the white out entirely — the note becomes a die-cut
-// paper shape and its gray drop shadow becomes real translucent shadow on the cork
+// note assets are die-cut renders on white: key the white out entirely — the note
+// becomes a paper cutout and its gray drop shadow becomes real translucent shadow
+// on the cork. Full resolution so the art stays crisp when zoomed in.
 function whiteKeyTex(path){
-  const c=document.createElement('canvas'); c.width=561; c.height=701;
+  const c=document.createElement('canvas'); c.width=1122; c.height=1402;
   const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; t.anisotropy=8;
   const img=new Image();
   img.onload=()=>{
+    const W=c.width,H=c.height;
     const ctx=c.getContext('2d');
-    ctx.drawImage(img,0,0,c.width,c.height);
-    const d=ctx.getImageData(0,0,c.width,c.height), px=d.data;
-    for(let i=0;i<px.length;i+=4){
-      const r=px[i],g=px[i+1],b=px[i+2];
-      const mx=Math.max(r,g,b), mn=Math.min(r,g,b);
-      if(mx-mn<34){ // neutral pixel: white bg or gray shadow
-        const lum=(r+g+b)/3;
-        px[i]=px[i+1]=px[i+2]=0;
-        px[i+3]=Math.round(Math.max(0,1-lum/235)*200); // white→0, gray→soft shadow
+    ctx.drawImage(img,0,0,W,H);
+    const d=ctx.getImageData(0,0,W,H), px=d.data;
+    const corner=(px[0]+px[1]+px[2])/3;
+    if(corner<128){
+      // dark background: flood-fill it from the borders so only the connected
+      // backdrop goes transparent — black ink inside the art is untouched
+      const seen=new Uint8Array(W*H), stack=[];
+      const bgLike=i4=>{ const r=px[i4],g=px[i4+1],b=px[i4+2];
+        return (r+g+b)/3<70 && Math.max(r,g,b)-Math.min(r,g,b)<40; };
+      for(let x=0;x<W;x++){ stack.push(x, (H-1)*W+x); }
+      for(let y=0;y<H;y++){ stack.push(y*W, y*W+W-1); }
+      while(stack.length){
+        const i=stack.pop();
+        if(seen[i]) continue; seen[i]=1;
+        const i4=i*4;
+        if(!bgLike(i4)) continue;
+        px[i4+3]=0;
+        const x=i%W, y=(i/W)|0;
+        if(x>0)stack.push(i-1); if(x<W-1)stack.push(i+1);
+        if(y>0)stack.push(i-W); if(y<H-1)stack.push(i+W);
+      }
+    } else {
+      // white background: key neutral light pixels; gray drop shadow becomes
+      // real translucent shadow on the cork
+      for(let i=0;i<px.length;i+=4){
+        if(px[i+3]<10) continue;
+        const r=px[i],g=px[i+1],b=px[i+2];
+        const mx=Math.max(r,g,b), mn=Math.min(r,g,b);
+        if(mx-mn<34){
+          const lum=(r+g+b)/3;
+          px[i]=px[i+1]=px[i+2]=0;
+          px[i+3]=Math.min(px[i+3],Math.round(Math.max(0,1-lum/235)*200));
+        }
       }
     }
     ctx.putImageData(d,0,0);
@@ -516,12 +518,11 @@ function whiteKeyTex(path){
   img.src=path;
   return t;
 }
-const WHITE_KEYED=new Set(['fish']);
 const BG_W=21.4, BG_H=BG_W*941/1672;      // full image incl. dark wall
 const BOARD_W=16.4, BOARD_H=8.6;          // usable cork area for cards/pan
 const board=new THREE.Mesh(
   new THREE.BoxGeometry(BG_W,BG_H,0.24),
-  new THREE.MeshStandardMaterial({map:assetTex('assets/board.png'),roughness:0.95,metalness:0})
+  new THREE.MeshStandardMaterial({map:assetTex('assets/board.jpg'),roughness:0.95,metalness:0})
 );
 board.receiveShadow=true; scene.add(board);
 
@@ -546,7 +547,7 @@ const cardGroup=new THREE.Group(); scene.add(cardGroup);
 const cards={};
 
 PROJECTS.forEach((p,i)=>{
-  // every project uses a rendered sticky-note asset, named assets/<id>.png
+  // every project uses a rendered sticky-note asset, named assets/<id>.jpg
   const cw=2.35, ch=2.35*1402/1122;
   const g=new THREE.Group();
   // paper with slight bend: plane with vertex offset
@@ -558,7 +559,7 @@ PROJECTS.forEach((p,i)=>{
   }
   geo.computeVertexNormals();
   const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({
-    map:(WHITE_KEYED.has(p.id)?whiteKeyTex:maskedTex)(`assets/${p.id}.png`),
+    map:whiteKeyTex(`assets/${p.id}.jpg`),
     transparent:true,roughness:0.85,metalness:0,side:THREE.DoubleSide}));
   mesh.receiveShadow=true;
   g.add(mesh);
