@@ -9,13 +9,14 @@ An interactive detective-style evidence board showcasing the case files of Marc 
 | Case | Project | Link |
 |---|---|---|
 | 001 | Big Two-Hearted River | https://bigtwoheartedriver.netlify.app/ |
-| 002 | My Mother Is a Fish (Listening Table) | https://my-mother-is-a-fish.netlify.app/ |
+| 002 | My Mother Is a Fish (Listening Table) | https://6a52f2d6f2ffea74e464b9e5--my-mother-is-a-fish.netlify.app/ |
 | 003 | I Have No Mouth | https://i-have-no-mouth.netlify.app/ |
 | 004 | AI Learning Studio | https://ai-learning-studio.netlify.app/ |
 | 005 | Nightfall: The Observatory Problem | https://nightfall-observatory-problem.netlify.app/ |
 | 006 | The AI Midway | https://prototype-midway-fable-5.netlify.app/ |
 | 007 | Omelas: The Classroom Walk | https://omelas-classroom-walk.netlify.app/ |
 | 008 | Affordable Housing Simulator | https://mwatkins03-netizen.github.io/Affordable-Housing-Simulator-Fable-5-/ |
+| 009 | Behind the Curtain | https://mwatkins03-netizen.github.io/Behind-the-Curtain-Fable-5-/ |
 
 ## What is Frictionware?
 

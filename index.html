@@ -383,7 +383,7 @@ const PROJECTS = [
    cat:'Literary Games', style:'polaroid', hue:'#4a6b52', year:'2026',
    desc:'An interactive reading of Hemingway’s story of recovery and ritual — students walk Nick Adams’ river and attend to what the prose refuses to say.',
    pos:[-6.2, 2.2]},
-  {id:'fish', no:'002', title:'My Mother Is a Fish', url:'https://my-mother-is-a-fish.netlify.app/',
+  {id:'fish', no:'002', title:'My Mother Is a Fish', url:'https://6a52f2d6f2ffea74e464b9e5--my-mother-is-a-fish.netlify.app/',
    cat:'Literary Games', style:'card', hue:'#5a4a3a', year:'2026',
    desc:'A classroom site for Faulkner’s As I Lay Dying — fifteen narrators, one coffin, and the strangest chapter in American literature.',
    pos:[-3.4, 3.1]},
@@ -407,6 +407,10 @@ const PROJECTS = [
    cat:'Literary Games', style:'polaroid', hue:'#3b5a6b', year:'2026',
    desc:'Le Guin’s impossible city as an eight-stage walk — every student decides, in the end, whether to stay or to leave.',
    pos:[0.6, -3.0]},
+  {id:'curtain', no:'009', title:'Behind the Curtain', url:'https://mwatkins03-netizen.github.io/Behind-the-Curtain-Fable-5-/',
+   cat:'AI Literacy', style:'note', hue:'#8a6a34', year:'2026', external:true,
+   desc:'A student walk through the beaded curtain of AI data privacy — rooms, strands, and data trails reveal what hangs behind every prompt, chat, and upload.',
+   pos:[-6.0,-1.7]},
   {id:'housing', no:'008', title:'Affordable Housing Simulator', url:'https://mwatkins03-netizen.github.io/Affordable-Housing-Simulator-Fable-5-/',
    cat:'Simulations', style:'map', hue:'#22403a', year:'2026', external:true,
    desc:'A city-builder about studentification and housing pressure — balance growth, rent, and community until the numbers become people. External archive: GitHub Pages.',
@@ -416,6 +420,8 @@ const PROJECTS = [
 /* gold = curated cross-link, red = same-category thread */
 const LINKS = [
   {a:'midway', b:'studio', gold:true, label:'AI PEDAGOGY'},
+  {a:'curtain', b:'midway'},
+  {a:'curtain', b:'studio', gold:true, label:'WHAT THE MACHINE KEEPS'},
   {a:'omelas', b:'housing', gold:true, label:'WHO PAYS FOR THE CITY'},
   {a:'river', b:'fish'},
   {a:'mouth', b:'nightfall'},
@@ -813,6 +819,11 @@ document.getElementById('dFull').onclick=()=>{ if(dFrame.requestFullscreen) dFra
 
 function glideTo(id,done){
   const p=byId[id];
+  if(document.hidden){ // rAF is paused in hidden tabs — jump instead of glide
+    nav.x=p.pos[0]; nav.y=p.pos[1]; nav.tz=13;
+    if(done) setTimeout(done,0);
+    return;
+  }
   const sx=nav.x,sy=nav.y,sz=nav.tz,t0=performance.now(),dur=REDUCED?0:900;
   function tick(t){
     const k=dur?Math.min(1,(t-t0)/dur):1, e=1-Math.pow(1-k,3);
